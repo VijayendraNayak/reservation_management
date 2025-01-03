@@ -124,10 +124,16 @@ const Slot = ({ handletimepopup }: Props) => {
           throw new Error("Failed to create reservation");
         }
       } catch (err) {
-        toast.error("Failed to reserve the slot. Please try again.");
+        toast.error(`Failed to reserve the slot. Please try again.${err}`,{
+          position: "top-right",
+          duration: 2000,
+        });
       }
     } else {
-      toast.error("Please select a time slot.");
+      toast.error("Please select a time slot.",{
+        position: "top-right",
+        duration: 2000,
+      });
     }
   };
 

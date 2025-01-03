@@ -6,6 +6,7 @@ import { toast, Toaster } from "sonner";
 import Swal from "sweetalert2";
 import Decorations from "@/components/Decorations";
 import Slot from "@/components/Slot";
+import Summary from "@/components/Summary";
 
 interface DateForm {
   _id?: string;
@@ -33,6 +34,7 @@ export default function Home() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<string>("");
+  const [summary, setSummary] = useState<boolean>(false);
   const tableRef = useRef<HTMLDivElement>(null);
 
   const { date } = useDateContext();
@@ -134,9 +136,13 @@ export default function Home() {
       await handleGetReservations();
     } catch (error) {
       console.error("Failed to create reservation:", error);
-      toast.error("Failed to create reservation. Please try again.");
+      toast.error("Failed to create reservation. Please try again.",{
+        position: "top-right",
+        duration: 2000,
+      });
     } finally {
       setIsLoading(false);
+      setSummary(true);
     }
   };
 
@@ -151,7 +157,10 @@ export default function Home() {
       setReservations(data.reservations);
     } catch (error) {
       console.error("Failed to fetch reservations:", error);
-      toast.error("Failed to fetch reservations. Please try again.");
+      toast.error("Failed to fetch reservations. Please try again.",{
+        position: "top-right",
+        duration: 2000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -233,6 +242,7 @@ export default function Home() {
     <main className="pt-16 mb-8 min-h-screen">
       {timePopup && <Slot handletimepopup={() => setTimePopup(false)} />}
       <Toaster richColors position="top-right" />
+      {summary && (<Summary togglesummary={() => setSummary(false)} />)}
       <Decorations />
       <div className="flex flex-col max-w-3xl mx-auto p-8 gap-4">
         <h1 className="text-3xl md:text-5xl font-bold mb-4 font-sans">
@@ -325,7 +335,7 @@ export default function Home() {
           disabled={isLoading}
           className={`bg-green-500 rounded-xl p-2 text-white font-semibold max-w-48 mx-auto transition-all duration-300 hover:bg-green-600 ${
             isLoading ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
+          } ${reservations.length === 0 ? 'hidden' : ''}`}
           onClick={handleGetReservations}
         >
           {isLoading ? 'Loading...' : 'See All Reservations'}
@@ -345,7 +355,8 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {reservations.map((reservation, index) => (
+                {reservations.filter((reservation) => reservation.name !== "John Doe") // Exclude "John Doe"
+                .map((reservation, index) => (
                   <tr 
                     key={reservation._id || `reservation-${index}`}
                     className="text-center"
